@@ -1,0 +1,10 @@
+SISTEMA DE CONTROL DE INVENTARIO Y GESTIÓN DE VENTAS DE CASCOS CON VISUALIZACIÓN 3D
+
+Este proyecto consiste en el desarrollo de una plataforma web adaptable (escritorio y móvil) destinada a automatizar la gestión operativa 
+del negocio "Taller de Miki", enfocado en la comercialización e importación de cascos para motociclistas. La solución aborda la problemática
+del manual de control de inventario mediante la implementación de un catálogo digital con modelos 3D interactivos, permiso tanto al vendedor 
+como al cliente (de su propio celular) inspeccionar los productos en 360° y verificar la disponibilidad real por marca, talla (S, M, L, XL) 
+y certificación de seguridad (DOT/ECE). El sistema optimiza el proceso de atención en mostrador, automatiza el descubrimiento de existencias,
+géneros alertas de reabastegimiento y proceso cobros en efectivo, transferencia o QR con la emisión de notas de venta impresiones,trabajando
+los tiempos de respuesta y eliminando errores en el arco diario 
+de caja.
