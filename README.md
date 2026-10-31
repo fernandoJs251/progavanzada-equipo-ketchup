@@ -25,9 +25,6 @@ Desarrollar e implementar una plataforma web integral (**BikerStock3D**) que cen
   * Implementar un sistema de autenticación de usuarios con roles diferenciados (Administrador y Cliente/Vendedor).
   * Garantizar la integridad y confidencialidad de los datos mediante la gestión segura de permisos en el sistema.
 
-* **Arquitectura Escalable y Eficiente:**
-  * Construir una arquitectura modular y limpia utilizando **Python con Flask y SQLAlchemy** en el backend para un manejo ágil de la base de datos relacional.
-  * Garantizar la facilidad de mantenimiento y la integración futura con módulos de pasarelas de pago o aplicaciones móviles.
 
 ---
 
