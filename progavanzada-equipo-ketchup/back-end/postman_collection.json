@@ -1,0 +1,537 @@
+{
+  "info": {
+    "_postman_id": "bikerstock3d-api-v2",
+    "name": "BIKERSTOCK3D API (Taller de Miki)",
+    "description": "Colección completa de pruebas para la API REST de BIKERSTOCK3D construida en Flask con SQLAlchemy.\n\nFlujo de prueba recomendado:\n1. Ejecuta 'Login (Admin)' en la carpeta 2. Autenticación -> El token JWT se guardará automáticamente en las variables de la colección.\n2. Ejecuta peticiones del Catálogo (listar cascos, filtrar, ver detalle).\n3. Ejecuta peticiones de Pedidos y Checkout (creación de pedido y descuento automático de stock).\n4. Prueba la creación, edición y ajuste de stock en el módulo de Inventario.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Sistema y Health",
+      "item": [
+        {
+          "name": "Verificar Estado de la API (Health)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Comprueba que el servidor Flask esté corriendo y la base de datos responda."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Autenticación",
+      "item": [
+        {
+          "name": "Login (Admin) -> Autoguarda Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('✓ Token JWT guardado en variable de colección {{token}}');",
+                  "}",
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Retorna usuario con rol ADMIN', function () {",
+                  "    pm.expect(res.user.rol).to.eql('ADMIN');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bikerstock3d.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Inicia sesión con credenciales de Administrador. El script de pruebas almacena automáticamente el token JWT para las siguientes peticiones."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Vendedor)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vendedor@bikerstock3d.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Cliente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@bikerstock3d.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registro de Nuevo Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Rodrigo Castro\",\n  \"email\": \"rodrigo.castro@gmail.com\",\n  \"password\": \"segura123\",\n  \"telefono\": \"+591 78912345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfil Actual (Requiere Token)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alternar Rol Rápido (Switch Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/switch-role",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "switch-role"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Catálogo y Cascos",
+      "item": [
+        {
+          "name": "Listar Todos los Cascos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar por Categoría (Integral)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos?categoria=Integral",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos"],
+              "query": [
+                {
+                  "key": "categoria",
+                  "value": "Integral"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar por Nombre o Marca ('AGV')",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos?q=AGV",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "AGV"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar solo Disponibles en Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos?inStock=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos"],
+              "query": [
+                {
+                  "key": "inStock",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Detalle de un Casco por ID (ID: 1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Casco (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Arai RX-7V Racing\",\n  \"marca\": \"Arai\",\n  \"categoria\": \"Integral\",\n  \"precio\": 4500,\n  \"precioAnterior\": 4900,\n  \"stock\": 6,\n  \"stockMinimo\": 2,\n  \"talla\": \"L\",\n  \"tallasDisponibles\": [\"M\", \"L\", \"XL\"],\n  \"color\": \"Blanco / Azul / Rojo\",\n  \"coloresDisponibles\": [\"Blanco / Azul / Rojo\", \"Negro Carbono\"],\n  \"imagen\": \"https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80\",\n  \"imagenes\": [\n    \"https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80\"\n  ],\n  \"descripcion\": \"Casco tope de gama para competición MotoGP de la legendaria marca japonesa Arai.\",\n  \"caracteristicas\": [\n    \"Fibra de carbono PB-SNC2\",\n    \"Alerón aerodinámico DF-X2\",\n    \"Homologación FIM Racing y ECE 22.06\"\n  ],\n  \"homologacion\": \"ECE 22.06 / FIM\",\n  \"peso\": \"1380g\",\n  \"destacado\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Casco por ID (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 780,\n  \"stock\": 9,\n  \"descripcion\": \"Casco integral optimizado con nueva pantalla Pinlock MaxVision 70.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ajustar Stock Rápido (Patch)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 15\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos/1/stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos", "1", "stock"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Casco por ID (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cascos/13",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cascos", "13"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Pedidos y Carrito (Checkout)",
+      "item": [
+        {
+          "name": "Listar Todos los Pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Pedido (Checkout con Descuento de Stock)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Pedido contiene número con prefijo BKS-2026', function () {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.numeroPedido).to.include('BKS-2026-');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"nombre\": \"Mateo\",\n    \"apellido\": \"Villanueva\",\n    \"ci\": \"7492014\",\n    \"telefono\": \"+591 76598741\",\n    \"correo\": \"mateo.villanueva@gmail.com\",\n    \"direccion\": \"Calle Sagárnaga #240\",\n    \"ciudad\": \"La Paz\",\n    \"notas\": \"Llamar antes de entregar\"\n  },\n  \"items\": [\n    {\n      \"helmet\": {\n        \"id\": 1,\n        \"nombre\": \"LS2 Stream Evo\",\n        \"marca\": \"LS2\",\n        \"precio\": 750,\n        \"imagen\": \"https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80\"\n      },\n      \"cantidad\": 1,\n      \"tallaSeleccionada\": \"M\",\n      \"colorSeleccionado\": \"Negro Mate\"\n    }\n  ],\n  \"subtotal\": 750,\n  \"envio\": 0,\n  \"total\": 750,\n  \"metodoPago\": \"QR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos"]
+            },
+            "description": "Registra una compra. Descuenta de forma automática las unidades adquiridas del stock del casco en la base de datos."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Estado de un Pedido (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Entregado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pedidos/ord-101/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pedidos", "ord-101", "estado"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Panel Administrativo y Métricas",
+      "item": [
+        {
+          "name": "Métricas del Dashboard (KPIs)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "metrics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Clientes del Sistema",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "clientes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Ventas Registradas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/ventas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ventas"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

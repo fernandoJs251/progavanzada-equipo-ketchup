@@ -1,14 +1,13 @@
 import { Customer } from '../types';
 import { INITIAL_CUSTOMERS } from '../data/customers';
 
-// NOTA DE ARQUITECTURA:
-// Capa de servicios para clientes
-// FUTURO BACKEND:
-// GET  /api/clientes
-// POST /api/clientes
-// GET  /api/clientes/:id
+/**
+ * Capa de servicios para clientes conectada con Flask (/api/clientes)
+ * y persistencia en LocalStorage con fallback.
+ */
 
 const CUSTOMERS_KEY = 'bikerstock3d_customers';
+const TOKEN_KEY = 'bikerstock3d_token';
 
 const getStoredCustomers = (): Customer[] => {
   const stored = localStorage.getItem(CUSTOMERS_KEY);
@@ -25,11 +24,25 @@ const getStoredCustomers = (): Customer[] => {
 
 export const customerService = {
   /**
-   * Obtiene todos los clientes
-   * FUTURO BACKEND: GET /api/clientes
+   * Obtiene todos los clientes desde Flask API o fallback local
+   * GET /api/clientes
    */
   async getCustomers(): Promise<Customer[]> {
-    await new Promise(res => setTimeout(res, 50));
+    try {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const res = await fetch('/api/clientes', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(data));
+          return data;
+        }
+      }
+    } catch {
+      // Fallback local
+    }
     return getStoredCustomers();
   }
 };

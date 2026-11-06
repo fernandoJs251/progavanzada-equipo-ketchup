@@ -43,7 +43,7 @@ VALUES
     ],
     'Casco aerodinámico integral fabricado en policarbonato HPTT de alta resistencia. Cuenta con visor solar retráctil integrado, ventilación dinámica y forro hipoalergénico desmontable y lavable.',
     ARRAY['Calota de HPTT', 'Visor solar interior', 'Cierre micrométrico metálico', 'Preparado para Pinlock 70 MaxVision'],
-    '/models/casco.glb', 4.70, 42, 'ECE 22.06 / DOT', '1550 ± 50g', true
+    '/models/casco.glb', 4.70, 42, 'ECE 22.06 / DOT', '15+50 ± 50g', true
 ),
 (
     2, 'AGV K1 S', 'AGV', 'Integral', 1650.00, 1790.00, 2, 4, 'L',

@@ -1,16 +1,15 @@
 import { User, UserRole } from '../types';
 import { MOCK_USERS } from '../data/users';
 
-// NOTA DE ARQUITECTURA:
-// Capa de autenticación con persistencia en LocalStorage
-// En producción, se conectaría con:
-// POST /api/auth/login -> { token, user }
-// POST /api/auth/register -> { token, user }
-// GET  /api/auth/me -> { user }
+/**
+ * Capa de autenticación con soporte para Backend Flask (/api/auth)
+ * y persistencia en LocalStorage con fallback local garantizado.
+ */
 
 const AUTH_USER_KEY = 'bikerstock3d_auth_user_v2';
 const REGISTERED_USERS_KEY = 'bikerstock3d_registered_users_v2';
 const LOGGED_OUT_KEY = 'bikerstock3d_logged_out';
+const TOKEN_KEY = 'bikerstock3d_token';
 
 export const authService = {
   /**
@@ -27,6 +26,20 @@ export const authService = {
       }
     }
     return MOCK_USERS;
+  },
+
+  /**
+   * Obtiene el token de autenticación JWT
+   */
+  getToken(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+  },
+
+  /**
+   * Guarda el token de autenticación JWT
+   */
+  setToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token);
   },
 
   /**
@@ -64,6 +77,22 @@ export const authService = {
    * Permite alternar roles para fines evaluativos y demostrativos
    */
   switchRole(role: UserRole): User {
+    // Sincronizar en segundo plano con la API de Flask si está disponible
+    fetch('/api/auth/switch-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rol: role })
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.token) {
+          this.setToken(data.token);
+        }
+      })
+      .catch(() => {
+        // Fallback silencioso
+      });
+
     const allUsers = this.getRegisteredUsers();
     let target = allUsers.find(u => u.rol === role);
     if (!target) {
@@ -74,10 +103,31 @@ export const authService = {
   },
 
   /**
-   * Inicia sesión por correo
+   * Inicia sesión por correo o credenciales
+   * POST /api/auth/login
    */
-  async login(email: string): Promise<User> {
-    await new Promise(res => setTimeout(res, 80));
+  async login(email: string, password: string = 'demo123'): Promise<User> {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          this.setToken(data.token);
+        }
+        if (data.user) {
+          this.setCurrentUser(data.user);
+          return data.user;
+        }
+      }
+    } catch {
+      // Fallback local ante caída de red o modo offline
+    }
+
     const allUsers = this.getRegisteredUsers();
     const found = allUsers.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
 
@@ -96,13 +146,38 @@ export const authService = {
 
   /**
    * Registra una nueva cuenta de usuario
+   * POST /api/auth/register
    */
-  async register(nombre: string, email: string): Promise<User> {
-    await new Promise(res => setTimeout(res, 100));
+  async register(nombre: string, email: string, password: string = 'demo123'): Promise<User> {
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedNombre = nombre.trim();
 
-    // Crear nuevo usuario
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: trimmedNombre,
+          email: trimmedEmail,
+          password
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          this.setToken(data.token);
+        }
+        if (data.user) {
+          this.setCurrentUser(data.user);
+          return data.user;
+        }
+      }
+    } catch {
+      // Fallback local
+    }
+
+    // Crear nuevo usuario local
     const newUser: User = {
       id: `usr-${Date.now()}`,
       nombre: trimmedNombre,
@@ -128,6 +203,7 @@ export const authService = {
    */
   logout() {
     localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.setItem(LOGGED_OUT_KEY, 'true');
   }
 };
