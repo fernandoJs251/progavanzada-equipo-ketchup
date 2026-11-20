@@ -14,9 +14,11 @@ export const Login: React.FC<LoginProps> = ({ defaultRegister = false }) => {
   const initialRegister = defaultRegister || searchParams.get('mode') === 'register';
 
   const [email, setEmail] = useState('admin@bikerstock3d.com');
-  const [password, setPassword] = useState('password123');
+  const [password, setPassword] = useState('admin123');
   const [isRegisterMode, setIsRegisterMode] = useState(initialRegister);
   const [nombre, setNombre] = useState('');
+  const [ci, setCi] = useState('8472910 LP');
+  const [telefono, setTelefono] = useState('+591 76543210');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login, register, switchRole, user } = useAuth();
@@ -46,7 +48,7 @@ export const Login: React.FC<LoginProps> = ({ defaultRegister = false }) => {
           setIsSubmitting(false);
           return;
         }
-        const newUser = await register(nombre, email);
+        const newUser = await register(nombre, email, password, ci, telefono);
         navigate(newUser.rol === 'ADMIN' ? '/admin' : '/cascos');
       } else {
         const loggedUser = await login(email);

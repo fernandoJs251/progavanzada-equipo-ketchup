@@ -14,7 +14,7 @@ export const INITIAL_PRODUCTS: Helmet[] = [
     tallasDisponibles: ["S", "M", "L", "XL"],
     color: "Negro Mate",
     coloresDisponibles: ["Negro Mate", "Titanio", "Rojo Brillo"],
-    imagen: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80",
+    imagen: '/images/cascos/1.jpg',
     imagenes: [
       "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1590506995460-d0d9892b54da?w=800&auto=format&fit=crop&q=80",

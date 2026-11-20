@@ -9,7 +9,8 @@ import { MOCK_USERS } from '../data/users';
 const AUTH_USER_KEY = 'bikerstock3d_auth_user_v2';
 const REGISTERED_USERS_KEY = 'bikerstock3d_registered_users_v2';
 const LOGGED_OUT_KEY = 'bikerstock3d_logged_out';
-const TOKEN_KEY = 'bikerstock3d_token';
+const TOKEN_KEY = 'bikerstock3d_token_v3';
+const LEGACY_TOKEN_KEY = 'bikerstock3d_token';
 
 export const authService = {
   /**
@@ -32,7 +33,7 @@ export const authService = {
    * Obtiene el token de autenticación JWT
    */
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY);
   },
 
   /**
@@ -40,6 +41,7 @@ export const authService = {
    */
   setToken(token: string) {
     localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(LEGACY_TOKEN_KEY, token);
   },
 
   /**
@@ -148,7 +150,7 @@ export const authService = {
    * Registra una nueva cuenta de usuario
    * POST /api/auth/register
    */
-  async register(nombre: string, email: string, password: string = 'demo123'): Promise<User> {
+  async register(nombre: string, email: string, password: string = 'cliente123', ci?: string, telefono?: string): Promise<User> {
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedNombre = nombre.trim();
 
@@ -159,7 +161,9 @@ export const authService = {
         body: JSON.stringify({
           nombre: trimmedNombre,
           email: trimmedEmail,
-          password
+          password,
+          ci: ci || '8472910 LP',
+          telefono: telefono || '+591 76543210'
         })
       });
 

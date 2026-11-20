@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useProducts } from '../context/ProductContext';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
 import { PaymentMethod } from '../types';
@@ -19,6 +20,7 @@ import {
 export const Checkout: React.FC = () => {
   const { items, subtotal, envio, total, clearCart } = useCart();
   const { user } = useAuth();
+  const { refreshProducts } = useProducts();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -107,9 +109,10 @@ export const Checkout: React.FC = () => {
 
       setCompletedOrderNumber(createdOrder.numeroPedido);
       clearCart();
+      await refreshProducts();
       showToast('Pedido realizado correctamente.', 'success', '¡Compra Exitosa!');
-    } catch {
-      showToast('Error al procesar el pedido. Intenta nuevamente.', 'error');
+    } catch (err: any) {
+      showToast(err?.message || 'Error al procesar el pedido. Intenta nuevamente.', 'error');
     } finally {
       setIsSubmitting(false);
     }

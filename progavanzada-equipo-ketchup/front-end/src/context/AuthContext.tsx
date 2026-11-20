@@ -10,7 +10,7 @@ interface AuthContextType {
   isSeller: boolean;
   isAuthenticated: boolean;
   login: (email: string) => Promise<User>;
-  register: (nombre: string, email: string) => Promise<User>;
+  register: (nombre: string, email: string, password?: string, ci?: string, telefono?: string) => Promise<User>;
   switchRole: (role: UserRole) => void;
   logout: () => void;
 }
@@ -33,8 +33,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return logged;
   };
 
-  const register = async (nombre: string, email: string): Promise<User> => {
-    const registered = await authService.register(nombre, email);
+  const register = async (nombre: string, email: string, password?: string, ci?: string, telefono?: string): Promise<User> => {
+    const registered = await authService.register(nombre, email, password, ci, telefono);
     setUser(registered);
     showToast(`¡Cuenta creada con éxito! Bienvenido, ${registered.nombre}`, 'success', 'Registro completado');
     return registered;

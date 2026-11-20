@@ -4,6 +4,7 @@ import { Helmet } from '../../types';
 import { useCart } from '../../context/CartContext';
 import { ShoppingBag, Star, Eye, Box, AlertCircle, Check } from 'lucide-react';
 import { Badge } from '../common/Badge';
+import { handleImageError } from '../../constants/images';
 
 interface ProductCardProps {
   helmet: Helmet;
@@ -87,6 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = memo(({ helmet }) => {
           alt=""
           loading="lazy"
           decoding="async"
+          onError={handleImageError}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#13131b] via-transparent to-transparent opacity-60 pointer-events-none" />

@@ -18,6 +18,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { handleImageError } from '../../constants/images';
 
 export const AdminProducts: React.FC = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useProducts();
@@ -219,6 +220,7 @@ export const AdminProducts: React.FC = () => {
                         <img
                           src={p.imagen}
                           alt={p.nombre}
+                          onError={handleImageError}
                           className="w-12 h-12 rounded-xl object-cover bg-[#1c1c28] border border-[#2c2d3c]"
                         />
                         <div>

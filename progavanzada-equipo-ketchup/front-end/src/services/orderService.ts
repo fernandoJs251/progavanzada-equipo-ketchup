@@ -3,7 +3,7 @@ import { INITIAL_ORDERS } from '../data/orders';
 
 /**
  * Capa de servicios para pedidos conectada con Backend Flask (/api/pedidos)
- * y persistencia en LocalStorage con fallback.
+ * con validación de stock atómica y persistencia en LocalStorage.
  */
 
 const ORDERS_KEY = 'bikerstock3d_orders_v2';
@@ -62,7 +62,7 @@ export const orderService = {
   },
 
   /**
-   * Crea un nuevo pedido desde checkout
+   * Crea un nuevo pedido desde checkout con validación de stock en el servidor
    * POST /api/pedidos
    */
   async createOrder(orderData: Omit<Order, 'id' | 'numeroPedido' | 'fecha'>): Promise<Order> {
@@ -72,16 +72,23 @@ export const orderService = {
         headers: getAuthHeaders(),
         body: JSON.stringify(orderData)
       });
+
       if (res.ok) {
         const created: Order = await res.json();
         const orders = getStoredOrders();
         saveStoredOrders([created, ...orders]);
         return created;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Error al procesar el pedido en el servidor');
       }
-    } catch {
-      // Fallback local
+    } catch (e: any) {
+      if (e?.message && e.message !== 'Failed to fetch') {
+        throw e;
+      }
     }
 
+    // Fallback local en caso de que el backend esté desconectado
     const orders = getStoredOrders();
     const count = orders.length + 1;
     const newOrder: Order = {
@@ -107,7 +114,8 @@ export const orderService = {
         body: JSON.stringify({ estado: newStatus })
       });
       if (res.ok) {
-        const updated: Order = await res.json();
+        const data = await res.json();
+        const updated: Order = data.pedido || data;
         const orders = getStoredOrders();
         const idx = orders.findIndex(o => o.id === orderId);
         if (idx !== -1) {

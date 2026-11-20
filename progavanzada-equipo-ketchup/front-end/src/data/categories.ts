@@ -5,7 +5,7 @@ export const CATEGORIES: CategoryInfo[] = [
     id: "integral",
     nombre: "Integral",
     descripcion: "Máxima protección y aerodinámica deportiva para circuito y carretera.",
-    imagen: "https://images.unsplash.com/photo-1590506995460-d0d9892b54da?w=800&auto=format&fit=crop&q=80",
+    imagen: '/images/cascos/integral.jpg',
     icono: "Shield",
     cantidad: 6
   },
@@ -13,7 +13,7 @@ export const CATEGORIES: CategoryInfo[] = [
     id: "modular",
     nombre: "Modular",
     descripcion: "Versatilidad touring con mentonera abatible para viajes largos y ciudad.",
-    imagen: "https://images.unsplash.com/photo-1558980664-769d59546b3d?w=800&auto=format&fit=crop&q=80",
+    imagen: '/images/cascos/modular.jpg',
     icono: "RotateCw",
     cantidad: 2
   },
@@ -21,7 +21,7 @@ export const CATEGORIES: CategoryInfo[] = [
     id: "abierto",
     nombre: "Abierto",
     descripcion: "Estilo retro, custom y libertad urbana con ventilación directa y ligereza.",
-    imagen: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=800&auto=format&fit=crop&q=80",
+    imagen: '/images/cascos/abierto.jpg',
     icono: "Wind",
     cantidad: 2
   },
@@ -29,7 +29,7 @@ export const CATEGORIES: CategoryInfo[] = [
     id: "off-road",
     nombre: "Off Road",
     descripcion: "Diseñados para resistir el barro, saltos y desafíos de Motocross y Enduro.",
-    imagen: "https://images.unsplash.com/photo-1634071256596-b796307cf310?w=800&auto=format&fit=crop&q=80",
+    imagen: '/images/cascos/offroad.jpg',
     icono: "Compass",
     cantidad: 2
   }

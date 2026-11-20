@@ -1,5 +1,6 @@
 import { Helmet } from '../types';
 import { INITIAL_PRODUCTS } from '../data/products';
+import { DEFAULT_HELMET_IMAGE } from '../constants/images';
 
 /**
  * Capa de servicios para productos con integración REST a Flask (/api/cascos)
@@ -80,29 +81,39 @@ export const productService = {
   },
 
   /**
-   * Crea un nuevo casco en inventario
+   * Crea un nuevo casco en inventario en la base de datos
    * POST /api/cascos
    */
   async createProduct(newProduct: Omit<Helmet, 'id'>): Promise<Helmet> {
+    const productToSend = {
+      ...newProduct,
+      imagen: newProduct.imagen?.trim() || DEFAULT_HELMET_IMAGE
+    };
+
     try {
       const res = await fetch('/api/cascos', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(newProduct)
+        body: JSON.stringify(productToSend)
       });
       if (res.ok) {
         const created: Helmet = await res.json();
         const products = getStoredProducts();
         saveStoredProducts([created, ...products]);
         return created;
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al crear producto');
       }
-    } catch {
-      // Fallback local
+    } catch (e: any) {
+      if (e?.message && e.message !== 'Failed to fetch') {
+        throw e;
+      }
     }
 
     const products = getStoredProducts();
     const created: Helmet = {
-      ...newProduct,
+      ...productToSend,
       id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1
     };
     const updated = [created, ...products];
@@ -111,7 +122,7 @@ export const productService = {
   },
 
   /**
-   * Actualiza los datos o stock de un casco
+   * Actualiza los datos de un casco en la base de datos
    * PUT /api/cascos/:id
    */
   async updateProduct(id: number, updates: Partial<Helmet>): Promise<Helmet> {
@@ -130,9 +141,14 @@ export const productService = {
           saveStoredProducts(products);
         }
         return updatedProduct;
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al actualizar producto');
       }
-    } catch {
-      // Fallback local
+    } catch (e: any) {
+      if (e?.message && e.message !== 'Failed to fetch') {
+        throw e;
+      }
     }
 
     const products = getStoredProducts();
@@ -148,7 +164,41 @@ export const productService = {
   },
 
   /**
-   * Elimina un casco del inventario
+   * Actualiza rápidamente el stock de un casco
+   * PATCH /api/cascos/:id/stock
+   */
+  async updateStock(id: number, stock: number): Promise<number> {
+    try {
+      const res = await fetch(`/api/cascos/${id}/stock`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ stock })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const products = getStoredProducts();
+        const idx = products.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          products[idx].stock = data.stock;
+          saveStoredProducts(products);
+        }
+        return data.stock;
+      }
+    } catch {
+      // Fallback local
+    }
+
+    const products = getStoredProducts();
+    const idx = products.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      products[idx].stock = stock;
+      saveStoredProducts(products);
+    }
+    return stock;
+  },
+
+  /**
+   * Elimina un casco del inventario en la base de datos
    * DELETE /api/cascos/:id
    */
   async deleteProduct(id: number): Promise<boolean> {
@@ -162,9 +212,14 @@ export const productService = {
         const filtered = products.filter(p => p.id !== id);
         saveStoredProducts(filtered);
         return true;
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Error al eliminar casco');
       }
-    } catch {
-      // Fallback local
+    } catch (e: any) {
+      if (e?.message && e.message !== 'Failed to fetch') {
+        throw e;
+      }
     }
 
     const products = getStoredProducts();

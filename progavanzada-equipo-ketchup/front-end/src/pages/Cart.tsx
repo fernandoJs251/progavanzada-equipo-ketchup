@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Truck, ChevronLeft } from 'lucide-react';
+import { handleImageError } from '../constants/images';
 
 export const Cart: React.FC = () => {
   const { items, updateQuantity, removeFromCart, clearCart, subtotal, envio, total } = useCart();
@@ -80,6 +81,7 @@ export const Cart: React.FC = () => {
                       <img
                         src={item.helmet.imagen}
                         alt={item.helmet.nombre}
+                        onError={handleImageError}
                         className="w-full h-full object-cover"
                       />
                     </Link>

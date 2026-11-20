@@ -6,6 +6,7 @@ import { Helmet3DViewer } from '../components/product/Helmet3DViewer';
 import { ProductCard } from '../components/catalog/ProductCard';
 import { Badge } from '../components/common/Badge';
 import { HelmetSize } from '../types';
+import { handleImageError } from '../constants/images';
 import { 
   Star, 
   ShoppingBag, 
@@ -105,6 +106,7 @@ export const ProductDetail: React.FC = () => {
               <img
                 src={selectedImage || helmet.imagen}
                 alt={helmet.nombre}
+                onError={handleImageError}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute top-4 left-4 flex gap-2">
@@ -143,7 +145,7 @@ export const ProductDetail: React.FC = () => {
                       : 'border-[#272736] opacity-70 hover:opacity-100 hover:border-zinc-500'
                   }`}
                 >
-                  <img src={img} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={img} alt={`Vista ${idx + 1}`} onError={handleImageError} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
